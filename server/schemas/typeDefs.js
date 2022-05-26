@@ -35,11 +35,25 @@ const typeDefs = gql`
         friends: [User]
     }
 
+    type Auth {
+        token: ID!
+        user: User
+    }
+
     type Query {
+        me: User
         users: [User]
         user(username: String!): User
         thoughts(username: String): [Thought]
         thought(_id: ID!): Thought
+    }
+
+    type Mutation {
+        login(email: String!, password: String!): Auth
+        addUser(username: String!, email: String!, password: String!): Auth
+        addThought(thoughtText: String!): Thought
+        addReaction(thoughtId: ID!, reactionBody: String!): Thought
+        addFriend(friendId: ID!): User
     }
 `;
 // we've now defined our thoughts query that it could receive a parameter if we wanted. In this case, the parameter would be identified as username and would have a String data type
@@ -67,3 +81,19 @@ module.exports = typeDefs;
     // Earlier, we didn't enforce a query parameter for thoughts because it wasn't necessary for the query to work. If there's no parameter, we simply return all thoughts. But if we want to look up a single thought or user, we need to know which one we're looking up and thus necessitate a parameter for us to look up that data.
 
 // username: String! --> this means, username is required for the query to be carried out. If it's not included, we'll get an error
+
+//LESSON 21.2.3
+// type Mutation {
+//     login(email: String!, password: String!): User
+//     addUser(username: String!, email: String!, password: String!): User
+// }
+    // Both will return a User object: either the user who successfully logged in or the user who was just created on sign-up.
+
+// LESSONS 21.2.4
+    // type Auth
+        // This means that an Auth type must return a token and can optionally include any other user data
+    // Next, update the two mutations to return an Auth object instead of a User object
+
+// LESSON 21.2.6
+    // type Mutation {
+        // Note that addReaction() will return the parent Thought instead of the newly created Reaction. This is because the front end will ultimately track changes on the thought level, not the reaction level.
