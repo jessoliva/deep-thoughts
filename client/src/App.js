@@ -3,6 +3,9 @@ import { ApolloProvider, ApolloClient, InMemoryCache, createHttpLink } from '@ap
 // BrowserRouter, Routes, and Route are components that the React Router library provides. We renamed BrowserRouter to Router to make it easier to work with
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
+// import function from Apollo Client that will retrieve the token from localStorage and include it with each request to the API.
+import { setContext } from '@apollo/client/link/context';
+
 import Header from './components/Header';
 import Footer from './components/Footer';
 
@@ -18,8 +21,24 @@ const httpLink = createHttpLink({
     uri: '/graphql',
 });
 // URI stands for "Uniform Resource Identifier."
+
+// With this function, setContext, we can create essentially a middleware function (this one) that will retrieve the token for us and combine it with the existing httpLink
+const authLink = setContext((_, { headers }) => {
+    const token = localStorage.getItem('id_token');
+    return {
+      headers: {
+        ...headers,
+        authorization: token ? `Bearer ${token}` : '',
+      },
+    };
+});
+// With the configuration of authLink, we use the setContext() function to retrieve the token from localStorage and set the HTTP request headers of every request to include the token, whether the request needs it or not. This is fine, because if the request doesn't need the token, our server-side resolver function won't check for it
+// we don't need the first parameter offered by setContext(), which stores the current request object in case this function is running after we've initiated a request
+// Because we're not using the first parameter, but we still need to access the second one, we can use an underscore _ to serve as a placeholder for the first parameter.
+
+// here, combine the authLink and httpLink objects so that every request retrieves the token and sets the request headers before making the request to the API
 const client = new ApolloClient({
-    link: httpLink,
+    link: authLink.concat(httpLink),
     cache: new InMemoryCache(),
 });
 // With the preceding code, we first establish a new link to the GraphQL server at its /graphql endpoint with createHttpLink()

@@ -43,22 +43,68 @@ export const QUERY_THOUGHT = gql`
 `;
 
 export const QUERY_USER = gql`
-    query user($username: String!) {
-        user(username: $username) {
-            _id
-            username
-            email
-            friendCount
-            friends {
-                _id
-                username
-            }
-            thoughts {
-                _id
-                thoughtText
-                createdAt
-                reactionCount
-            }
+  query user($username: String!) {
+      user(username: $username) {
+          _id
+          username
+          email
+          friendCount
+          friends {
+              _id
+              username
+          }
+          thoughts {
+              _id
+              thoughtText
+              createdAt
+              reactionCount
+          }
+      }
+  }
+`;
+
+// to display info of logged in user in profile.js page
+// With this query, we're going to retrieve essentially all data related to the logged-in user. We'll retrieve their user information, thoughts, reactions to those thoughts, and friend list. This one will be great for the user's personal profile page
+// With this query, we're requesting significantly less data to be returned over HTTP
+export const QUERY_ME = gql`
+  {
+    me {
+      _id
+      username
+      email
+      friendCount
+      thoughts {
+        _id
+        thoughtText
+        createdAt
+        reactionCount
+        reactions {
+          _id
+          createdAt
+          reactionBody
+          username
         }
+      }
+      friends {
+        _id
+        username
+      }
     }
+  }
+`;
+
+// for the homepage
+export const QUERY_ME_BASIC = gql`
+  {
+    me {
+      _id
+      username
+      email
+      friendCount
+      friends {
+        _id
+        username
+      }
+    }
+  }
 `;

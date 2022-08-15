@@ -1,28 +1,49 @@
 import React, { useState } from 'react';
+import { useMutation } from '@apollo/client';
+import { LOGIN_USER } from '../utils/mutations';
+// to implement authentication functionality 
+import Auth from '../utils/auth';
 
 const Login = (props) => {
-  const [formState, setFormState] = useState({ email: '', password: '' });
+	const [formState, setFormState] = useState({ email: '', password: '' });
 
-  // update state based on form input changes
-  const handleChange = (event) => {
-    const { name, value } = event.target;
+	//  initialize our LOGIN_USER mutation with the useMutation() Hook first
+	const [login, { error }] = useMutation(LOGIN_USER);
 
-    setFormState({
-      ...formState,
-      [name]: value,
-    });
-  };
+	// update state based on form input changes
+	const handleChange = (event) => {
+		const { name, value } = event.target;
 
-  // submit form
-  const handleFormSubmit = async (event) => {
-    event.preventDefault();
+		setFormState({
+			...formState,
+			[name]: value,
+		});
+	};
 
-    // clear form values
-    setFormState({
-      email: '',
-      password: '',
-    });
-  };
+	// submit form
+	const handleFormSubmit = async (event) => {
+		event.preventDefault();
+
+		// the ... in this context is being used as the spread operator
+		// This means that we are setting the variables field in our mutation to be an object with key/value pairs that match directly to what our formState object looks like
+		try {
+			const { data } = await login({
+				variables: { ...formState }
+			});
+			
+			// this will now set our token to localStorage and bring us back to the homepage of the application upon a successful login
+			Auth.login(data.login.token);
+			// console.log(data);
+		} catch (e) {
+		  	console.error(e);
+		}
+
+		// clear form values
+		setFormState({
+			email: '',
+			password: '',
+		});
+	};
 
   return (
     <main className='flex-row justify-center mb-4'>
@@ -53,6 +74,7 @@ const Login = (props) => {
                 Submit
               </button>
             </form>
+			{error && <div>Login failed</div>}
           </div>
         </div>
       </div>
